@@ -6,12 +6,14 @@ const $objkt = {
   registerExport,
   _exports: {},
   _exported: {},
-  isCapture() {
-    return query.has('capture');
-  },
+  isCapture: query.has('capture'),
+  seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
   capture,
 };
 window.$objkt = $objkt;
+if (query.has('seed')) {
+  $objkt.seed = parseInt(query.get('seed'), 16);
+}
 
 function registerExport(args, fn) {
   const err = new Error(`Cannot register exporter for ${JSON.stringify(args)}`);
@@ -34,7 +36,7 @@ function registerExport(args, fn) {
 }
 
 async function capture(args) {
-  if ($objkt.isCapture()) {
+  if ($objkt.isCapture) {
     const exporter = Object.values(this._exports).find(
       (o) => o.default === true
     );
