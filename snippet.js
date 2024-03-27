@@ -14,10 +14,15 @@ const $objkt = {
 window.$objkt = $objkt;
 
 function registerExport(args, fn) {
-  const err = new Error(`Cannot register export for ${JSON.stringify(args)}`);
+  const err = new Error(`Cannot register exporter for ${JSON.stringify(args)}`);
   if (typeof fn !== 'function') throw err;
-  if (typeof args?.mime !== 'string') throw err;
+  if (typeof args !== 'object' || Array.isArray(args)) throw err;
+  if (typeof args.mime !== 'string') throw err;
+  if (!args.resolution?.x || !args.resolution?.x) throw err;
   if ($objkt._exports[args.mime]) throw err;
+  if (args.aspectRatio) {
+    args.resolution.y = args.resolution.x * args.aspectRatio;
+  }
 
   $objkt._exports[args.mime] = { ...args, fn };
 
@@ -37,7 +42,7 @@ async function capture(args) {
     const exported = await exporter.fn(args);
 
     $objkt._exported = { mime: exporter.mime, exported };
+    // when the capture host gets this event it should retrieve the exported content from `$objkt._exported`
     window.dispatchEvent(new Event('exported'));
-    console.log('exported', exported);
   }
 }

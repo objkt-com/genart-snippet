@@ -41,21 +41,31 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   $objkt.capture();
 }
 
-async function pngExport({ resolution: { x: x, y: y } }) {
-  draw(x, y);
-  const blob = await new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/png');
-  });
-  draw();
+function exportCanvas(mime) {
+  return async ({ resolution: { x: x, y: y } }) => {
+    draw(x, y);
+    const blob = await new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), mime);
+    });
+    draw();
 
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  };
 }
 
 $objkt.registerExport(
   { mime: 'image/png', resolution: { x: 1024, y: 1024 }, default: true },
-  pngExport
+  exportCanvas('image/png')
+);
+$objkt.registerExport(
+  {
+    mime: 'image/jpeg',
+    resolution: { x: 600, y: 400 },
+    aspectRatio: 3 / 2,
+  },
+  exportCanvas('image/jpeg')
 );
