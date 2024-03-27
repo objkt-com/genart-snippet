@@ -9,9 +9,12 @@
         border: 2px dashed brown;
       }
     </style>
+
     <script>
+      const RENDERED_TIMEOUT_MS = 10 * 1000;
       const exporters = [];
 
+      // called by the iframed generator
       function registerExport(exporter) {
         createExporter(exporter);
         exporters.push(exporter);
@@ -20,7 +23,7 @@
       function createExporter(exporter) {
         const button = document.createElement('button');
         button.textContent = `Export ${exporter.mime}, res: ${exporter.resolution.x}x${exporter.resolution.y}`;
-        document.body.appendChild(button);
+        document.getElementById('controls').appendChild(button);
 
         button.onclick = async () => {
           const link = document.createElement('a');
@@ -32,11 +35,44 @@
           });
         };
       }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // this sample host environment forwards its query params to its iframe to make it easier to test things
+        const query = new URLSearchParams(window.location.search);
+        const iframe = document.getElementById('generator');
+        const src = iframe.getAttribute('src');
+        iframe.setAttribute('src', src + '?' + query.toString());
+
+        Promise.race([
+          new Promise((resolve) => {
+            window.addEventListener('exported', (e) => {
+              console.log('$objkt.capture() has been called', e.detail);
+              const img = document.createElement('img');
+              img.setAttribute('src', e.detail.exported);
+              document.getElementById('captured').innerHTML =
+                '<p>Preview generated:</p>';
+              document.getElementById('captured').appendChild(img);
+              resolve(true);
+            });
+          }),
+          new Promise((resolve) =>
+            setTimeout(() => resolve(false), RENDERED_TIMEOUT_MS)
+          ),
+        ]).then((success) => {
+          if (query.has('capture') && !success) {
+            console.error('$objkt.capture has not been called');
+          }
+        });
+      });
     </script>
   </head>
+
   <body>
     <p>Here's a sample generator in an iframe:</p>
     <iframe id="generator" src="./generator.html"></iframe>
-    <p>Here are the exporters it registered:</p>
+    <div id="controls">
+      <p>Here are the exporters it registered:</p>
+    </div>
+    <div id="captured"></div>
   </body>
 </html>

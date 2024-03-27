@@ -16,10 +16,15 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   canvas.height = height;
 
   const ctx = canvas.getContext('2d');
-
   ctx.clearRect(0, 0, width, height);
 
-  ctx.fillStyle = 'lightgreen';
+  console.log(`?seed=${$objkt.seed.toString(16)}`);
+  const colors = {
+    bgFill: $objkt.seed.toString(16).substring(0, 6),
+    ellipseFill: $objkt.seed.toString(16).substring(1, 7),
+  };
+
+  ctx.fillStyle = '#' + colors.bgFill;
   ctx.strokeStyle = 'black';
   ctx.fillRect(0, 0, width, height);
   ctx.save();
@@ -27,13 +32,13 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.ellipse(
     width / 2,
     height / 2,
-    width / 6,
-    width / 8,
-    Math.PI / 4,
+    width / (($objkt.seed % 4) + 3),
+    width / (($objkt.seed % 6) + 3),
+    Math.PI / (($objkt.seed % 3) + 1),
     0,
     2 * Math.PI
   );
-  ctx.fillStyle = 'lightblue';
+  ctx.fillStyle = '#' + colors.ellipseFill;
   ctx.fill();
   ctx.stroke();
 

@@ -5,14 +5,14 @@ const $objkt = {
   version: '0.0.1',
   registerExport,
   _exports: {},
-  _exported: {},
+  _exported: null,
   isCapture: query.has('capture'),
   seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
   capture,
 };
 window.$objkt = $objkt;
 if (query.has('seed')) {
-  $objkt.seed = parseInt(query.get('seed'), 16);
+  $objkt.seed = parseInt(query.get('seed'), 16) % Number.MAX_SAFE_INTEGER;
 }
 
 function registerExport(args, fn) {
@@ -35,16 +35,24 @@ function registerExport(args, fn) {
   return true;
 }
 
-async function capture(args) {
-  if ($objkt.isCapture) {
+async function capture() {
+  if ($objkt.isCapture && !$objkt._exported) {
+    $objkt._exported = { status: 'pending' };
     const exporter = Object.values(this._exports).find(
       (o) => o.default === true
     );
     if (!exporter) throw new Error(`No default exporter found`);
-    const exported = await exporter.fn(args);
+    const exported = await exporter.fn({
+      resolution: exporter.resolution,
+      status: 'done',
+    });
 
     $objkt._exported = { mime: exporter.mime, exported };
     // when the capture host gets this event it should retrieve the exported content from `$objkt._exported`
-    window.dispatchEvent(new Event('exported'));
+    [parent, window].forEach((target) =>
+      target?.dispatchEvent(
+        new CustomEvent('exported', { detail: $objkt._exported })
+      )
+    );
   }
 }
