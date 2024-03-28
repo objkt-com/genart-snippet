@@ -2,17 +2,27 @@
 const query = new URLSearchParams(window.location.search);
 
 const $objkt = {
-  version: '0.0.1',
-  registerExport,
   _exports: {},
-  _exported: null,
-  isCapture: query.has('capture'),
-  seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+  _v: '0.0.1',
   capture,
+  isCapture: query.has('capture'),
+  registerExport,
+  registerFeatures,
+  seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 };
 window.$objkt = $objkt;
 if (query.has('seed')) {
   $objkt.seed = parseInt(query.get('seed'), 16) % Number.MAX_SAFE_INTEGER;
+}
+
+function registerFeatures(features) {
+  if (typeof features === 'undefined') {
+    return ($objkt.features = null);
+  }
+  if (typeof features !== 'object' || Array.isArray(features)) {
+    throw new Error('registerFeatures expects an object');
+  }
+  return ($objkt.features = features);
 }
 
 function registerExport(args, fn) {

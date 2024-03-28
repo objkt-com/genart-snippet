@@ -29,12 +29,20 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.fillRect(0, 0, width, height);
   ctx.save();
 
+  const ellipseWidth = ($objkt.seed % 4) + 3;
+  const ellipseHeight = ($objkt.seed % 6) + 3;
+
+  $objkt.registerFeatures({
+    background: colorFeatures(colors.bgFill),
+    object: colorFeatures(colors.ellipseFill),
+  });
+
   ctx.ellipse(
     width / 2,
     height / 2,
-    width / (($objkt.seed % 4) + 3),
-    width / (($objkt.seed % 6) + 3),
-    Math.PI / (($objkt.seed % 3) + 1),
+    width / ellipseWidth,
+    height / ellipseHeight,
+    Math.PI / (($objkt.seed % 2) + 1) / 2,
     0,
     2 * Math.PI
   );
@@ -44,6 +52,22 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
 
   // here's how the artist must trigger the capture, it will use the `default` exporter with the provided resolution
   $objkt.capture();
+}
+
+function colorFeatures(color) {
+  const rgb = parseInt(color, 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = (rgb >> 0) & 0xff;
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  if (lum >= 80 && lum <= 100) {
+    return 'shade';
+  }
+  if (lum < 40) {
+    return 'dark';
+  }
+  return 'light';
 }
 
 function exportCanvas(mime) {
