@@ -60,7 +60,9 @@ function registerExport(args, fn) {
   $objkt._exports[args.mime] = { ...args, fn };
 
   if (parent && parent.registerExport) {
-    parent.registerExport($objkt._exports[args.mime]);
+    try {
+      parent.registerExport($objkt._exports[args.mime]);
+    } catch (_) {}
   }
 
   return true;
