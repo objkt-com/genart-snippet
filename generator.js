@@ -29,8 +29,8 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.fillRect(0, 0, width, height);
   ctx.save();
 
-  const ellipseWidth = ($objkt.seed % 4) + 3;
-  const ellipseHeight = ($objkt.seed % 6) + 3;
+  const ellipseWidth = $objkt.rnd() * 4 + 3;
+  const ellipseHeight = $objkt.rnd() * 6 + 3;
 
   $objkt.registerFeatures({
     background: colorFeatures(colors.bgFill),

@@ -1,19 +1,40 @@
 // the JS snippet provided by objkt, to be included by the artist in their generators
 const query = new URLSearchParams(window.location.search);
 
-const $objkt = {
+window.$objkt = {
   _exports: {},
+  _exported: null,
   _v: '0.0.1',
   capture,
   isCapture: query.has('capture'),
   registerExport,
   registerFeatures,
-  seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+  seed: Math.floor(Math.random() * Date.now()),
 };
-window.$objkt = $objkt;
 if (query.has('seed')) {
-  $objkt.seed = parseInt(query.get('seed'), 16) % Number.MAX_SAFE_INTEGER;
+  $objkt.seed =
+    parseInt(
+      query
+        .get('seed')
+        .replace(/[^0-9a-f]/gi, 'f')
+        .padEnd(12, 'f'),
+      16
+    ) % Number.MAX_SAFE_INTEGER;
+  query.set('seed', $objkt.seed.toString(16));
+  window.history.pushState('', '', '?' + query.toString());
 }
+$objkt.rnd = (function splitmix32(a) {
+  return (state) => {
+    if (state === null) a = $objkt.seed;
+    a |= 0;
+    a = (a + 0x9e3779b9) | 0;
+    let t = a ^ (a >>> 16);
+    t = Math.imul(t, 0x21f0aaad);
+    t = t ^ (t >>> 15);
+    t = Math.imul(t, 0x735a2d97);
+    return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
+  };
+})($objkt.seed);
 
 function registerFeatures(features) {
   if (typeof features === 'undefined') {
