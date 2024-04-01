@@ -94,6 +94,33 @@ describe('$objkt', () => {
     it('default export gets called', async function () {
       const { $objkt, window } = init();
       const exportPng = async ({ resolution: { x, y } }) => {
+        assert.equal(x, 900);
+        assert.equal(y, 900);
+        return 'foo';
+      };
+      $objkt.registerExport(
+        { resolution: { x: 1024, y: 1024 }, default: true, mime: 'image/png' },
+        exportPng
+      );
+      await new Promise((resolve) => setTimeout(resolve()), 100);
+      window.postMessage({ id: '$objkt:export', mime: 'image/png', resolution: { x: 900, y: 900 } }, '*');
+
+      return new Promise((resolve) => {
+        const wait = ({ data }) => {
+          if (data.id === '$objkt:exported') {
+            assert.equal(data.exported, 'foo');
+            window.removeEventListener('message', wait);
+            resolve();
+          }
+        };
+        window.addEventListener('message', wait);
+      });
+    });
+
+    it('default export is used for capture at registered resolution', async function () {
+      const { $objkt, window } = init();
+      $objkt.isCapture = true;
+      const exportPng = async ({ resolution: { x, y } }) => {
         assert.equal(x, 1024);
         assert.equal(y, 1024);
         return 'foo';
@@ -103,11 +130,12 @@ describe('$objkt', () => {
         exportPng
       );
       await new Promise((resolve) => setTimeout(resolve()), 100);
-      window.postMessage({ id: '$objkt:export', mime: 'image/png', resolution: { x: 1024, y: 1024 } }, '*');
+
+      await window.capture();
 
       return new Promise((resolve) => {
         const wait = ({ data }) => {
-          if (data.id === '$objkt:exported') {
+          if (data.id === '$objkt:captured') {
             assert.equal(data.exported, 'foo');
             window.removeEventListener('message', wait);
             resolve();

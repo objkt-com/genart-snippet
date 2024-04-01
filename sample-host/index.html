@@ -63,7 +63,7 @@
                 console.log(`host 2 got ${e.data.id}`);
                 console.log('$objkt.capture() has been called', e.data);
                 const img = document.createElement('img');
-                img.setAttribute('src', e.data.detail.exported);
+                img.setAttribute('src', e.data.exported);
                 document.getElementById('captured').innerHTML = '<p>Preview generated:</p>';
                 document.getElementById('captured').appendChild(img);
                 resolve(true);

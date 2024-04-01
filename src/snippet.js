@@ -78,7 +78,7 @@ function cast(msgId, payload) {
 async function capture() {
   if ($objkt.isCapture && !$objkt._exported) {
     $objkt._exported = { status: 'pending' };
-    const exporter = Object.values(this._exports).find((o) => o.default === true);
+    const exporter = Object.values($objkt._exports).find((o) => o.default === true);
     if (!exporter) throw new Error(`No default exporter found`);
     const exported = await exporter.fn({
       resolution: exporter.resolution,
@@ -86,7 +86,7 @@ async function capture() {
     });
 
     $objkt._exported = { mime: exporter.mime, exported };
-    cast('captured', { detail: $objkt._exported });
+    cast('captured', { ...$objkt._exported });
   }
 }
 
