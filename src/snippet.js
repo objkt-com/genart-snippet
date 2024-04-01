@@ -1,4 +1,4 @@
-const query = new URLSearchParams(window.location.search);
+var query = new URLSearchParams(window.location.search);
 
 window.$objkt = {
   _exports: {},
@@ -93,7 +93,7 @@ async function capture() {
 window.addEventListener('message', (e) => {
   if (e.data.id === '$objkt:export') {
     const exporter = $objkt._exports[e.data.mime];
-    exporter.fn(e.data).then((exported) => {
+    exporter?.fn(e.data).then((exported) => {
       cast('exported', { ...e.data, exported });
     });
   }
