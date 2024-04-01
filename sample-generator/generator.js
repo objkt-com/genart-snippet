@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initialize() {
   canvas = document.getElementById('my-canvas');
-
+  $objkt.rnd(null);
   window.addEventListener('resize', () => draw(), false);
   draw();
 }
