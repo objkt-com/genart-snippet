@@ -1,26 +1,61 @@
-let assert = chai.assert;
+const isBrowser = typeof window !== 'undefined';
+const isNode = !isBrowser;
+
+let assert, readFileSync, JSDOM, VirtualConsole;
+
+if (isNode) {
+  ({ assert } = await import('chai'));
+  ({ readFileSync } = await import('fs'));
+  ({ JSDOM, VirtualConsole } = await import('jsdom'));
+} else {
+  assert = chai.assert;
+}
+
+function init() {
+  if (isNode) {
+    const virtualConsole = new VirtualConsole();
+
+    const dom = new JSDOM(`<script>${readFileSync('./src/snippet.js').toString()}</script>`, {
+      runScripts: 'dangerously',
+      virtualConsole,
+    });
+    virtualConsole.sendTo(console);
+
+    return dom.window;
+  }
+  return window;
+}
 
 async function $objktReset() {
+  if (!isBrowser) return;
+
   let snippet;
   if ((snippet = document.getElementById('snippet'))) {
     snippet.remove();
   }
+  if (window.$objkt) {
+    delete window.$objkt;
+  }
+
   const head = document.getElementsByTagName('head')[0];
   snippet = document.createElement('script');
-  snippet.src = `../src/snippet.js?cache-bust=${Math.floor(Math.random() * 100000)}`;
+  snippet.src = `../src/snippet.js?cache-bust=${Math.floor(Math.random() * 100000).toString(16)}`;
   snippet.setAttribute('id', 'snippet');
   head.appendChild(snippet);
-  $objkt.seed = 123;
-  $objkt.rnd(null);
-  // wait a tiny bit for the snippet to be compiled+executed
-  return new Promise((resolve) => setTimeout(resolve), 100);
+
+  await new Promise((resolve) => {
+    snippet.onload = resolve;
+  });
+
+  window.$objkt.seed = 123;
+  window.$objkt.rnd(null);
 }
 
 describe('$objkt', () => {
   beforeEach('reset + seed $objkt', $objktReset);
-
   describe('#rnd()', () => {
     it('should be deterministic', () => {
+      const { $objkt } = init();
       $objkt.seed = 123;
       $objkt.rnd(null);
       assert.equal($objkt.rnd(), 0.21505506429821253);
@@ -30,6 +65,7 @@ describe('$objkt', () => {
     });
 
     it('can be reset by passing null', () => {
+      const { $objkt } = init();
       $objkt.seed = 928173;
       for (let i = 0; i < 2; i++) {
         $objkt.rnd(null);
@@ -46,6 +82,7 @@ describe('$objkt', () => {
     const exportPng = async ({ resolution: { x, y } }) => 'foo';
 
     it('should register a default export', () => {
+      const { $objkt } = init();
       $objkt.registerExport(
         { resolution: { x: 1024, y: 1024 }, default: true, mime: 'image/png' },
         exportPng
@@ -55,6 +92,7 @@ describe('$objkt', () => {
     });
 
     it('default export gets called', async function () {
+      const { $objkt, window } = init();
       const exportPng = async ({ resolution: { x, y } }) => {
         assert.equal(x, 1024);
         assert.equal(y, 1024);
@@ -65,7 +103,7 @@ describe('$objkt', () => {
         exportPng
       );
       await new Promise((resolve) => setTimeout(resolve()), 100);
-      window.postMessage({ id: '$objkt:export', mime: 'image/png', resolution: { x: 1024, y: 1024 } });
+      window.postMessage({ id: '$objkt:export', mime: 'image/png', resolution: { x: 1024, y: 1024 } }, '*');
 
       return new Promise((resolve) => {
         const wait = ({ data }) => {
