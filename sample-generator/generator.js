@@ -6,12 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initialize() {
   canvas = document.getElementById('my-canvas');
-  $objkt.rnd(null);
   window.addEventListener('resize', () => draw(), false);
   draw();
 }
 
 function draw(width = window.innerWidth, height = window.innerHeight) {
+  $objkt.rnd(null);
+  const ratio = width / height;
+
   canvas.width = width;
   canvas.height = height;
 
@@ -30,7 +32,6 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.save();
 
   const ellipseWidth = $objkt.rnd() * 4 + 3;
-  const ellipseHeight = $objkt.rnd() * 6 + 3;
 
   $objkt.registerFeatures({
     background: colorFeatures(colors.bgFill),
@@ -41,7 +42,7 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
     width / 2,
     height / 2,
     width / ellipseWidth,
-    height / ellipseHeight,
+    ratio * 20,
     Math.PI / (($objkt.seed % 2) + 1) / 2,
     0,
     2 * Math.PI
