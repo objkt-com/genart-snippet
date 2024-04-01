@@ -76,7 +76,6 @@ function exportCanvas(mime) {
     const blob = await new Promise((resolve) => {
       canvas.toBlob((blob) => resolve(blob), mime);
     });
-    draw();
 
     return new Promise((resolve) => {
       const reader = new FileReader();

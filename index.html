@@ -12,29 +12,7 @@
 
     <script>
       const RENDERED_TIMEOUT_MS = 10 * 1000;
-      const exporters = [];
-
-      // called by the iframed generator
-      function registerExport(exporter) {
-        createExporter(exporter);
-        exporters.push(exporter);
-      }
-
-      function createExporter(exporter) {
-        const button = document.createElement('button');
-        button.textContent = `Export ${exporter.mime}, res: ${exporter.resolution.x}x${exporter.resolution.y}`;
-        document.getElementById('controls').appendChild(button);
-
-        button.onclick = async () => {
-          const link = document.createElement('a');
-          link.download = `image.${exporter.mime.split('/')[1]}`;
-
-          exporter.fn(exporter).then((dataURL) => {
-            link.href = dataURL;
-            link.click();
-          });
-        };
-      }
+      const exporters = {};
 
       document.addEventListener('DOMContentLoaded', () => {
         // this sample host environment forwards its query params to its iframe to make it easier to test things
@@ -43,21 +21,56 @@
         const src = iframe.getAttribute('src');
         iframe.setAttribute('src', src + '?' + query.toString());
 
+        window.addEventListener('message', (e) => {
+          const data = e.data;
+          if (data.id === '$objkt:register-export' && !exporters[data.mime]) {
+            console.log(`host 1 got ${data.id}`);
+            console.log(`${data.default ? 'default ' : ''}export registered for ${data.mime}`);
+            exporters[data.mime] = true;
+            createExporter(data);
+          }
+          if (data.id === '$objkt:exported') {
+            console.log(`got exported data for mime ${data.mime}`);
+            const link = document.createElement('a');
+            link.download = `image.${data.mime.split('/')[1]}`;
+            link.href = data.exported;
+            link.click();
+          }
+        });
+
+        function createExporter(exporter) {
+          const button = document.createElement('button');
+          button.textContent = `Export ${exporter.mime}, res: ${exporter.resolution.x}x${exporter.resolution.y}`;
+          document.getElementById('controls').appendChild(button);
+
+          button.onclick = () => {
+            console.log(`host asks for an export for mime ${exporter.mime}`);
+            iframe.contentWindow.postMessage(
+              {
+                id: '$objkt:export',
+                mime: exporter.mime,
+                resolution: exporter.resolution,
+              },
+              '*'
+            );
+          };
+        }
+
         Promise.race([
           new Promise((resolve) => {
-            window.addEventListener('exported', (e) => {
-              console.log('$objkt.capture() has been called', e.detail);
-              const img = document.createElement('img');
-              img.setAttribute('src', e.detail.exported);
-              document.getElementById('captured').innerHTML =
-                '<p>Preview generated:</p>';
-              document.getElementById('captured').appendChild(img);
-              resolve(true);
+            window.addEventListener('message', (e) => {
+              if (e.data.id === '$objkt:captured') {
+                console.log(`host 2 got ${e.data.id}`);
+                console.log('$objkt.capture() has been called', e.data);
+                const img = document.createElement('img');
+                img.setAttribute('src', e.data.detail.exported);
+                document.getElementById('captured').innerHTML = '<p>Preview generated:</p>';
+                document.getElementById('captured').appendChild(img);
+                resolve(true);
+              }
             });
           }),
-          new Promise((resolve) =>
-            setTimeout(() => resolve(false), RENDERED_TIMEOUT_MS)
-          ),
+          new Promise((resolve) => setTimeout(() => resolve(false), RENDERED_TIMEOUT_MS)),
         ]).then((success) => {
           if (query.has('capture') && !success) {
             console.error('$objkt.capture has not been called');
@@ -69,7 +82,23 @@
 
   <body>
     <p>Here's a sample generator in an iframe:</p>
-    <iframe id="generator" src="./generator.html"></iframe>
+    <!--safe mode-->
+    <iframe
+      id="generator"
+      sandbox="allow-scripts allow-downloads"
+      allow="accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; midi;"
+      scrolling=""
+      src="./generator.html"
+    ></iframe>
+    <!--advanced mode-->
+    <!-- <iframe
+      id="generator"
+      sandbox="allow-scripts allow-downloads allow-same-origin"
+      allow="accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; midi;"
+      scrolling=""
+      src="./generator.html"
+    ></iframe> -->
+
     <div id="controls">
       <p>Here are the exporters it registered:</p>
     </div>

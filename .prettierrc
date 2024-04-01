@@ -1,5 +1,6 @@
 {
   "htmlWhitespaceSensitivity": "css",
   "singleQuote": true,
-  "bracketSameLine": false
+  "bracketSameLine": false,
+  "printWidth": 110
 }

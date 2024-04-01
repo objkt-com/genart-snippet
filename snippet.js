@@ -1,4 +1,3 @@
-// the JS snippet provided by objkt, to be included by the artist in their generators
 const query = new URLSearchParams(window.location.search);
 
 window.$objkt = {
@@ -56,24 +55,30 @@ function registerExport(args, fn) {
   if (args.aspectRatio) {
     args.resolution.y = args.resolution.x * args.aspectRatio;
   }
+  args = {
+    mime: args.mime,
+    aspectRatio: args.aspectRatio,
+    resolution: args.resolution,
+    default: !!args.default,
+  };
 
   $objkt._exports[args.mime] = { ...args, fn };
-
-  if (parent && parent.registerExport) {
-    try {
-      parent.registerExport($objkt._exports[args.mime]);
-    } catch (_) {}
-  }
-
+  cast('register-export', args);
   return true;
+}
+
+function cast(msgId, payload) {
+  [parent, window].forEach((target) => {
+    try {
+      target?.postMessage({ ...payload, id: `$objkt:${msgId}` }, '*');
+    } catch (_) {}
+  });
 }
 
 async function capture() {
   if ($objkt.isCapture && !$objkt._exported) {
     $objkt._exported = { status: 'pending' };
-    const exporter = Object.values(this._exports).find(
-      (o) => o.default === true
-    );
+    const exporter = Object.values(this._exports).find((o) => o.default === true);
     if (!exporter) throw new Error(`No default exporter found`);
     const exported = await exporter.fn({
       resolution: exporter.resolution,
@@ -81,11 +86,15 @@ async function capture() {
     });
 
     $objkt._exported = { mime: exporter.mime, exported };
-    // when the capture host gets this event it should retrieve the exported content from `$objkt._exported`
-    [parent, window].forEach((target) =>
-      target?.dispatchEvent(
-        new CustomEvent('exported', { detail: $objkt._exported })
-      )
-    );
+    cast('captured', { detail: $objkt._exported });
   }
 }
+
+window.addEventListener('message', (e) => {
+  if (e.data.id === '$objkt:export') {
+    const exporter = $objkt._exports[e.data.mime];
+    exporter.fn(e.data).then((exported) => {
+      cast('exported', { ...e.data, exported });
+    });
+  }
+});
