@@ -1,6 +1,6 @@
 var query = new URLSearchParams(window.location.search);
 
-window.$objkt = {
+window.$o = {
   _exports: {},
   _exported: null,
   _v: '0.0.1',
@@ -11,7 +11,7 @@ window.$objkt = {
   seed: Math.floor(Math.random() * Date.now()),
 };
 if (query.has('seed')) {
-  $objkt.seed =
+  $o.seed =
     parseInt(
       query
         .get('seed')
@@ -19,12 +19,12 @@ if (query.has('seed')) {
         .padEnd(12, 'f'),
       16
     ) % Number.MAX_SAFE_INTEGER;
-  query.set('seed', $objkt.seed.toString(16));
+  query.set('seed', $o.seed.toString(16));
   window.history.pushState('', '', '?' + query.toString());
 }
-$objkt.rnd = (function splitmix32(a) {
+$o.rnd = (function splitmix32(a) {
   return (state) => {
-    if (state === null) a = $objkt.seed;
+    if (state === null) a = $o.seed;
     a |= 0;
     a = (a + 0x9e3779b9) | 0;
     let t = a ^ (a >>> 16);
@@ -33,16 +33,16 @@ $objkt.rnd = (function splitmix32(a) {
     t = Math.imul(t, 0x735a2d97);
     return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
   };
-})($objkt.seed);
+})($o.seed);
 
 function registerFeatures(features) {
   if (typeof features === 'undefined') {
-    return ($objkt.features = null);
+    return ($o.features = null);
   }
   if (typeof features !== 'object' || Array.isArray(features)) {
     throw new Error('registerFeatures expects an object');
   }
-  return ($objkt.features = features);
+  return ($o.features = features);
 }
 
 function registerExport(args, fn) {
@@ -51,7 +51,7 @@ function registerExport(args, fn) {
   if (typeof args !== 'object' || Array.isArray(args)) throw err;
   if (typeof args.mime !== 'string') throw err;
   if (!args.resolution?.x || !args.resolution?.x) throw err;
-  if ($objkt._exports[args.mime]) throw err;
+  if ($o._exports[args.mime]) throw err;
   if (args.aspectRatio) {
     args.resolution.y = args.resolution.x * args.aspectRatio;
   }
@@ -62,7 +62,7 @@ function registerExport(args, fn) {
     default: !!args.default,
   };
 
-  $objkt._exports[args.mime] = { ...args, fn };
+  $o._exports[args.mime] = { ...args, fn };
   cast('register-export', args);
   return true;
 }
@@ -70,29 +70,29 @@ function registerExport(args, fn) {
 function cast(msgId, payload) {
   [parent, window].forEach((target) => {
     try {
-      target?.postMessage({ ...payload, id: `$objkt:${msgId}` }, '*');
+      target?.postMessage({ ...payload, id: `$o:${msgId}` }, '*');
     } catch (_) {}
   });
 }
 
 async function capture() {
-  if ($objkt.isCapture && !$objkt._exported) {
-    $objkt._exported = { status: 'pending' };
-    const exporter = Object.values($objkt._exports).find((o) => o.default === true);
+  if ($o.isCapture && !$o._exported) {
+    $o._exported = { status: 'pending' };
+    const exporter = Object.values($o._exports).find((o) => o.default === true);
     if (!exporter) throw new Error(`No default exporter found`);
     const exported = await exporter.fn({
       resolution: exporter.resolution,
       status: 'done',
     });
 
-    $objkt._exported = { mime: exporter.mime, exported };
-    cast('captured', { ...$objkt._exported });
+    $o._exported = { mime: exporter.mime, exported };
+    cast('captured', { ...$o._exported });
   }
 }
 
 window.addEventListener('message', (e) => {
-  if (e.data.id === '$objkt:export') {
-    const exporter = $objkt._exports[e.data.mime];
+  if (e.data.id === '$o:export') {
+    const exporter = $o._exports[e.data.mime];
     exporter?.fn(e.data).then((exported) => {
       cast('exported', { ...e.data, exported });
     });

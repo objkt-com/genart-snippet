@@ -23,13 +23,13 @@
 
         window.addEventListener('message', (e) => {
           const data = e.data;
-          if (data.id === '$objkt:register-export' && !exporters[data.mime]) {
+          if (data.id === '$o:register-export' && !exporters[data.mime]) {
             console.log(`host 1 got ${data.id}`);
             console.log(`${data.default ? 'default ' : ''}export registered for ${data.mime}`);
             exporters[data.mime] = true;
             createExporter(data);
           }
-          if (data.id === '$objkt:exported') {
+          if (data.id === '$o:exported') {
             console.log(`got exported data for mime ${data.mime}`);
             const link = document.createElement('a');
             link.download = `image.${data.mime.split('/')[1]}`;
@@ -47,7 +47,7 @@
             console.log(`host asks for an export for mime ${exporter.mime}`);
             iframe.contentWindow.postMessage(
               {
-                id: '$objkt:export',
+                id: '$o:export',
                 mime: exporter.mime,
                 resolution: exporter.resolution,
               },
@@ -59,9 +59,9 @@
         Promise.race([
           new Promise((resolve) => {
             window.addEventListener('message', (e) => {
-              if (e.data.id === '$objkt:captured') {
+              if (e.data.id === '$o:captured') {
                 console.log(`host 2 got ${e.data.id}`);
-                console.log('$objkt.capture() has been called', e.data);
+                console.log('$o.capture() has been called', e.data);
                 const img = document.createElement('img');
                 img.setAttribute('src', e.data.exported);
                 document.getElementById('captured').innerHTML = '<p>Preview generated:</p>';
@@ -73,7 +73,7 @@
           new Promise((resolve) => setTimeout(() => resolve(false), RENDERED_TIMEOUT_MS)),
         ]).then((success) => {
           if (query.has('capture') && !success) {
-            console.error('$objkt.capture has not been called');
+            console.error('$o.capture has not been called');
           }
         });
       });

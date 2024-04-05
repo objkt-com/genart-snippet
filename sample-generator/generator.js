@@ -11,7 +11,7 @@ function initialize() {
 }
 
 function draw(width = window.innerWidth, height = window.innerHeight) {
-  $objkt.rnd(null);
+  $o.rnd(null);
   const ratio = width / height;
 
   canvas.width = width;
@@ -20,10 +20,10 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, width, height);
 
-  console.log(`?seed=${$objkt.seed.toString(16)}`);
+  console.log(`?seed=${$o.seed.toString(16)}`);
   const colors = {
-    bgFill: $objkt.seed.toString(16).substring(0, 6),
-    ellipseFill: $objkt.seed.toString(16).substring(1, 7),
+    bgFill: $o.seed.toString(16).substring(0, 6),
+    ellipseFill: $o.seed.toString(16).substring(1, 7),
   };
 
   ctx.fillStyle = '#' + colors.bgFill;
@@ -31,9 +31,9 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.fillRect(0, 0, width, height);
   ctx.save();
 
-  const ellipseWidth = $objkt.rnd() * 4 + 3;
+  const ellipseWidth = $o.rnd() * 4 + 3;
 
-  $objkt.registerFeatures({
+  $o.registerFeatures({
     background: colorFeatures(colors.bgFill),
     object: colorFeatures(colors.ellipseFill),
   });
@@ -43,7 +43,7 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
     height / 2,
     width / ellipseWidth,
     ratio * 20,
-    Math.PI / (($objkt.seed % 2) + 1) / 2,
+    Math.PI / (($o.seed % 2) + 1) / 2,
     0,
     2 * Math.PI
   );
@@ -52,7 +52,7 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   ctx.stroke();
 
   // here's how the artist must trigger the capture, it will use the `default` exporter with the provided resolution
-  $objkt.capture();
+  $o.capture();
 }
 
 function colorFeatures(color) {
@@ -86,11 +86,11 @@ function exportCanvas(mime) {
   };
 }
 
-$objkt.registerExport(
+$o.registerExport(
   { mime: 'image/png', resolution: { x: 1024, y: 1024 }, default: true },
   exportCanvas('image/png')
 );
-$objkt.registerExport(
+$o.registerExport(
   {
     mime: 'image/jpeg',
     resolution: { x: 600, y: 400 },
