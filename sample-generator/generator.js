@@ -4,9 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initialize();
 });
 
-function initialize() {
+async function initialize() {
   canvas = document.getElementById('my-canvas');
   window.addEventListener('resize', () => draw(), false);
+
+  var query = new URLSearchParams(window.location.search);
+  if (query.has('sleep')) {
+    await new Promise((resolve) => setTimeout(resolve, parseInt(query.get('sleep') * 1000, 10)));
+  }
   draw();
 }
 
