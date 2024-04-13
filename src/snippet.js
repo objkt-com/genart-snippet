@@ -84,8 +84,8 @@ async function capture() {
       resolution: exporter.resolution,
       status: 'done',
     });
-
-    $o._exported = { mime: exporter.mime, exported };
+    const { resolution, aspectRatio, mime } = exporter;
+    $o._exported = { mime, resolution, aspectRatio, exported };
     cast('captured', { ...$o._exported });
   }
 }

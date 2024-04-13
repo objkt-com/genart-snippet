@@ -128,6 +128,13 @@ describe('$o', () => {
         const wait = ({ data }) => {
           if (data.id === '$o:captured') {
             assert.equal(data.exported, 'foo');
+            assert.deepEqual(data, {
+              mime: 'image/png',
+              resolution: { x: 1024, y: 1024 },
+              aspectRatio: undefined,
+              exported: 'foo',
+              id: '$o:captured',
+            });
             window.removeEventListener('message', wait);
             resolve();
           }
