@@ -60,6 +60,7 @@ function registerExport(args, fn) {
     aspectRatio: args.aspectRatio,
     resolution: args.resolution,
     default: !!args.default,
+    thumb: !!args.thumb,
   };
 
   $o._exports[args.mime] = { ...args, fn };

@@ -26,6 +26,7 @@
           if (data.id === '$o:register-export' && !exporters[data.mime]) {
             console.log(`host 1 got ${data.id}`);
             console.log(`${data.default ? 'default ' : ''}export registered for ${data.mime}`);
+            console.log(`${data.thumb ? 'thumb ' : ''}export registered for ${data.mime}`);
             exporters[data.mime] = true;
             createExporter(data);
           }
