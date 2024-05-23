@@ -60,6 +60,7 @@ function registerExport(args, fn) {
     aspectRatio: args.aspectRatio,
     resolution: args.resolution,
     default: !!args.default,
+    thumb: !!args.thumb,
   };
 
   $o._exports[args.mime] = { ...args, fn };
@@ -93,6 +94,7 @@ async function capture() {
 window.addEventListener('message', (e) => {
   if (e.data.id === '$o:export') {
     const exporter = $o._exports[e.data.mime];
+    console.log(e.data);
     exporter?.fn(e.data).then((exported) => {
       cast('exported', { ...e.data, exported });
     });

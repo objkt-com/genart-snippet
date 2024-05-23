@@ -26,6 +26,7 @@
           if (data.id === '$o:register-export' && !exporters[data.mime]) {
             console.log(`host 1 got ${data.id}`);
             console.log(`${data.default ? 'default ' : ''}export registered for ${data.mime}`);
+            console.log(`${data.thumb ? 'thumb ' : ''}export registered for ${data.mime}`);
             exporters[data.mime] = true;
             createExporter(data);
           }
@@ -41,6 +42,8 @@
         function createExporter(exporter) {
           const button = document.createElement('button');
           button.textContent = `Export ${exporter.mime}, res: ${exporter.resolution.x}x${exporter.resolution.y}`;
+          if (exporter.default) button.textContent += ' [default]';
+          if (exporter.thumb) button.textContent += ' [thumb]';
           document.getElementById('controls').appendChild(button);
 
           button.onclick = () => {
@@ -83,21 +86,21 @@
   <body>
     <p>Here's a sample generator in an iframe:</p>
     <!--safe mode-->
-    <iframe
+    <!-- <iframe
       id="generator"
       sandbox="allow-scripts allow-downloads"
       allow="accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; midi;"
       scrolling=""
-      src="../sample-generator/generator.html"
-    ></iframe>
+      src="../sample-generator-gif/index.html"
+    ></iframe> -->
     <!--advanced mode-->
-    <!-- <iframe
+    <iframe
       id="generator"
       sandbox="allow-scripts allow-downloads allow-same-origin"
       allow="accelerometer; camera; gyroscope; microphone; xr-spatial-tracking; midi;"
       scrolling=""
-      src="./generator.html"
-    ></iframe> -->
+      src="../sample-generator-gif/index.html"
+    ></iframe>
 
     <div id="controls">
       <p>Here are the exporters it registered:</p>
