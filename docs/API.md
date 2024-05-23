@@ -15,7 +15,7 @@ Here's how the capture works:
 
 An artwork can register other exports than the default one. You can use those to let viewers download images from your artwork instead of implementing a hotkey system (such as *hit `d` to download a PNG*.) The parent of your iframe, which we call *the host*, will know which exports have been registered and show buttons allowing viewers to trigger those exports.
 
-Additionally, an artwork can register a custom thumbnail export. This is particularly interesting for animated GIFs. For thumb exports we strongly recommend an aspect ratio of 1:1 and a size of max 400x400px. Use `thumb: true`.
+Additionally, an artwork can register a custom thumbnail export. This is particularly interesting for animated GIFs. For thumb exports we strongly enforce an aspect ratio of 1:1 and strongly recommend a max resolution of 400x400px. Use `thumb: true`.
 
 Example:
 
