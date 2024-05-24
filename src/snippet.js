@@ -16,7 +16,7 @@ if (query.has('seed')) {
       query
         .get('seed')
         .replace(/[^0-9a-f]/gi, 'f')
-        .padEnd(12, 'f'),
+        .padEnd(8, 'f'),
       16
     ) % Number.MAX_SAFE_INTEGER;
   query.set('seed', $o.seed.toString(16));

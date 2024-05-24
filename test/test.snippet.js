@@ -64,6 +64,16 @@ describe('$o', () => {
       assert.equal($o.rnd(), 0.03844817215576768);
     });
 
+    it("splitmix32's seed is in [0, 2^32-1] and wraps", () => {
+      const { $o } = init();
+      $o.seed = 0;
+      $o.rnd(null);
+      assert.equal($o.rnd(), 0.8505931859835982);
+      $o.seed = 2 ** 32;
+      $o.rnd(null);
+      assert.equal($o.rnd(), 0.8505931859835982);
+    });
+
     it('can be reset by passing null', () => {
       const { $o } = init();
       $o.seed = 928173;
