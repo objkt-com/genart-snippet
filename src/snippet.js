@@ -8,7 +8,7 @@ window.$o = {
   isCapture: query.has('capture'),
   registerExport,
   registerFeatures,
-  seed: Math.floor(Math.random() * Date.now()),
+  seed: Math.floor(Math.random() * Date.now()) % 4294967296,
 };
 if (query.has('seed')) {
   $o.seed =
@@ -16,9 +16,9 @@ if (query.has('seed')) {
       query
         .get('seed')
         .replace(/[^0-9a-f]/gi, 'f')
-        .padEnd(8, 'f'),
+        .padStart(8, '0'),
       16
-    ) % Number.MAX_SAFE_INTEGER;
+    ) % 4294967296;
   query.set('seed', $o.seed.toString(16));
   window.history.pushState('', '', '?' + query.toString());
 }
