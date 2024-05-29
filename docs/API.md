@@ -9,13 +9,13 @@ Its main functionalities are:
 
 Here's how the capture works:
 
-1. the artwork must register a default exporter function (`default: true`)
+1. the artwork must register a single default exporter function (`default: true`)
 2. this function must resolve to a data URL representing the display image
 3. the artwork must call `$o.capture()` once it's ready for capture
 
 An artwork can register other exports than the default one. You can use those to let viewers download images from your artwork instead of implementing a hotkey system (such as *hit `d` to download a PNG*.) The parent of your iframe, which we call *the host*, will know which exports have been registered and show buttons allowing viewers to trigger those exports.
 
-Additionally, an artwork can register a custom thumbnail export. This is particularly interesting for animated GIFs. For thumb exports we strongly enforce an aspect ratio of 1:1 and strongly recommend a max resolution of 400x400px. Use `thumb: true`.
+Additionally, an artwork can register a custom thumbnail exporter. This is particularly interesting for animated GIFs. For thumb exports we enforce an aspect ratio of 1:1 (`resolution.y` will be set to the provided `resolution.x`) and strongly recommend a max resolution of 400x400px. Use `thumb: true`. There can be at most one thumbnail exporter.
 
 Example:
 
