@@ -9,22 +9,25 @@ window.$o = {
   registerExport,
   registerFeatures,
   seed: Math.floor(Math.random() * Date.now()) % 4294967296,
+  seed2: Math.floor(Math.random() * Date.now()) % 4294967296,
 };
-if (query.has('seed')) {
-  $o.seed =
-    parseInt(
-      query
-        .get('seed')
-        .replace(/[^0-9a-f]/gi, 'f')
-        .padStart(8, '0'),
-      16
-    ) % 4294967296;
-  query.set('seed', $o.seed.toString(16));
-  window.history.pushState('', '', '?' + query.toString());
-}
-$o.rnd = (function splitmix32(a) {
+['seed', 'seed2'].forEach((p) => {
+  if (query.has(p)) {
+    $o[p] =
+      parseInt(
+        query
+          .get(p)
+          .replace(/[^0-9a-f]/gi, 'f')
+          .padStart(8, '0'),
+        16
+      ) % 4294967296;
+    query.set(p, $o[p].toString(16));
+    window.history.pushState('', '', '?' + query.toString());
+  }
+});
+function splitmix32(a, p) {
   return (state) => {
-    if (state === null) a = $o.seed;
+    if (state === null) a = $o[p];
     a |= 0;
     a = (a + 0x9e3779b9) | 0;
     let t = a ^ (a >>> 16);
@@ -33,7 +36,9 @@ $o.rnd = (function splitmix32(a) {
     t = Math.imul(t, 0x735a2d97);
     return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
   };
-})($o.seed);
+}
+$o.rnd = splitmix32($o.seed, 'seed');
+$o.rnd2 = splitmix32($o.seed2, 'seed2');
 
 function registerFeatures(features) {
   if (typeof features === 'undefined') {
