@@ -53,37 +53,42 @@ async function $oReset() {
 
 describe('$o', () => {
   beforeEach('reset + seed $o', $oReset);
-  describe('#rnd()', () => {
-    it('should be deterministic', () => {
-      const { $o } = init();
-      $o.seed = 123;
-      $o.rnd(null);
-      assert.equal($o.rnd(), 0.21505506429821253);
-      assert.equal($o.rnd(), 0.7675276368390769);
-      assert.equal($o.rnd(), 0.33604247961193323);
-      assert.equal($o.rnd(), 0.03844817215576768);
-    });
+  [
+    ['seed', 'rnd'],
+    ['seed2', 'rnd2'],
+  ].forEach(([seed, rnd]) => {
+    describe(`#${rnd}()`, () => {
+      it('should be deterministic', () => {
+        const { $o } = init();
+        $o[seed] = 123;
+        $o[rnd](null);
+        assert.equal($o[rnd](), 0.21505506429821253);
+        assert.equal($o[rnd](), 0.7675276368390769);
+        assert.equal($o[rnd](), 0.33604247961193323);
+        assert.equal($o[rnd](), 0.03844817215576768);
+      });
 
-    it("splitmix32's seed is in [0, 2^32-1] and wraps", () => {
-      const { $o } = init();
-      $o.seed = 0;
-      $o.rnd(null);
-      assert.equal($o.rnd(), 0.8505931859835982);
-      $o.seed = 2 ** 32;
-      $o.rnd(null);
-      assert.equal($o.rnd(), 0.8505931859835982);
-    });
+      it("splitmix32's seed is in [0, 2^32-1] and wraps", () => {
+        const { $o } = init();
+        $o[seed] = 0;
+        $o[rnd](null);
+        assert.equal($o[rnd](), 0.8505931859835982);
+        $o[seed] = 2 ** 32;
+        $o[rnd](null);
+        assert.equal($o[rnd](), 0.8505931859835982);
+      });
 
-    it('can be reset by passing null', () => {
-      const { $o } = init();
-      $o.seed = 928173;
-      for (let i = 0; i < 2; i++) {
-        $o.rnd(null);
-        assert.equal($o.rnd(), 0.7746125012636185);
-        assert.equal($o.rnd(), 0.3132142429240048);
-        assert.equal($o.rnd(), 0.5991196266841143);
-        assert.equal($o.rnd(), 0.590831205714494);
-      }
+      it('can be reset by passing null', () => {
+        const { $o } = init();
+        $o[seed] = 928173;
+        for (let i = 0; i < 2; i++) {
+          $o[rnd](null);
+          assert.equal($o[rnd](), 0.7746125012636185);
+          assert.equal($o[rnd](), 0.3132142429240048);
+          assert.equal($o[rnd](), 0.5991196266841143);
+          assert.equal($o[rnd](), 0.590831205714494);
+        }
+      });
     });
   });
 
