@@ -9,9 +9,9 @@ window.$o = {
   registerExport,
   registerFeatures,
   seed: Math.floor(Math.random() * Date.now()) % 4294967296,
-  seed2: Math.floor(Math.random() * Date.now()) % 4294967296,
+  seedGlobal: Math.floor(Math.random() * Date.now()) % 4294967296,
 };
-['seed', 'seed2'].forEach((p) => {
+['seed', 'seedGlobal'].forEach((p) => {
   if (query.has(p)) {
     $o[p] =
       parseInt(
@@ -38,7 +38,7 @@ function splitmix32(a, p) {
   };
 }
 $o.rnd = splitmix32($o.seed, 'seed');
-$o.rnd2 = splitmix32($o.seed2, 'seed2');
+$o.rndGlobal = splitmix32($o.seedGlobal, 'seedGlobal');
 
 function registerFeatures(features) {
   if (typeof features === 'undefined') {

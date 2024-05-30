@@ -55,7 +55,7 @@ describe('$o', () => {
   beforeEach('reset + seed $o', $oReset);
   [
     ['seed', 'rnd'],
-    ['seed2', 'rnd2'],
+    ['seedGlobal', 'rndGlobal'],
   ].forEach(([seed, rnd]) => {
     describe(`#${rnd}()`, () => {
       it('should be deterministic', () => {
