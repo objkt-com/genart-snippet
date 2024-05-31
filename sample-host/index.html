@@ -16,10 +16,13 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         // this sample host environment forwards its query params to its iframe to make it easier to test things
-        const query = new URLSearchParams(window.location.search);
+        const hostQuery = new URLSearchParams(window.location.search);
         const iframe = document.getElementById('generator');
         const src = iframe.getAttribute('src');
-        iframe.setAttribute('src', src + '?' + query.toString());
+        const iframeUrl = new URL(src, document.baseURI);
+        const iframeQuery = iframeUrl.searchParams;
+        hostQuery.forEach((val, key) => iframeUrl.searchParams.set(key, val));
+        iframe.setAttribute('src', iframeUrl.toString());
 
         window.addEventListener('message', (e) => {
           const data = e.data;
@@ -75,7 +78,7 @@
           }),
           new Promise((resolve) => setTimeout(() => resolve(false), RENDERED_TIMEOUT_MS)),
         ]).then((success) => {
-          if (query.has('capture') && !success) {
+          if (hostQuery.has('capture') && !success) {
             console.error('$o.capture has not been called');
           }
         });

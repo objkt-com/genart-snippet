@@ -13,22 +13,20 @@ function cancel() {
   if (timeout) clearTimeout(timeout);
   if (requestId) cancelAnimationFrame(requestId);
 }
+function reset() {
+  cancel();
+  draw();
+}
 async function initialize() {
   canvas = document.getElementById('my-canvas');
-  window.addEventListener(
-    'resize',
-    () => {
-      cancel();
-      draw();
-    },
-    false
-  );
+  window.addEventListener('resize', () => reset(), false);
 
   var query = new URLSearchParams(window.location.search);
   if (query.has('sleep')) {
     await new Promise((resolve) => setTimeout(resolve, parseInt(query.get('sleep') * 1000, 10)));
   }
-  draw();
+  reset();
+  reset();
 }
 
 function drawFrame(angle, width, height) {
@@ -62,6 +60,7 @@ function draw(width = window.innerWidth, height = window.innerHeight) {
   $o.capture();
 
   i = (i + 1) % 36;
+  clearTimeout(timeout);
   timeout = setTimeout(() => {
     requestId = requestAnimationFrame(() => draw(canvas.width, canvas.height));
   }, 20);
@@ -76,7 +75,10 @@ function exportCanvas(mime) {
 
     return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
+      reader.onloadend = () => {
+        reset();
+        resolve(reader.result);
+      };
       reader.readAsDataURL(blob);
     });
   };
@@ -104,8 +106,7 @@ async function createGif({ resolution: { x: x, y: y } }) {
     gif.render();
   }).then((blob) => {
     return new Promise((resolve) => {
-      cancel();
-      draw();
+      reset();
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
       reader.readAsDataURL(blob);
