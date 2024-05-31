@@ -10,28 +10,31 @@
       window.$o = {
         _exports: {},
         _exported: null,
-        _v: '0.0.1',
+        _v: '1.0.0',
         capture,
         isCapture: query.has('capture'),
         registerExport,
         registerFeatures,
-        seed: Math.floor(Math.random() * Date.now()),
+        seed: Math.floor(Math.random() * Date.now()) % 4294967296,
+        seedGlobal: Math.floor(Math.random() * Date.now()) % 4294967296,
       };
-      if (query.has('seed')) {
-        $o.seed =
-          parseInt(
-            query
-              .get('seed')
-              .replace(/[^0-9a-f]/gi, 'f')
-              .padEnd(12, 'f'),
-            16
-          ) % Number.MAX_SAFE_INTEGER;
-        query.set('seed', $o.seed.toString(16));
-        window.history.pushState('', '', '?' + query.toString());
-      }
-      $o.rnd = (function splitmix32(a) {
+      ['seed', 'seedGlobal'].forEach((p) => {
+        if (query.has(p)) {
+          $o[p] =
+            parseInt(
+              query
+                .get(p)
+                .replace(/[^0-9a-f]/gi, 'f')
+                .padStart(8, '0'),
+              16
+            ) % 4294967296;
+          query.set(p, $o[p].toString(16));
+          window.history.pushState('', '', '?' + query.toString());
+        }
+      });
+      function splitmix32(a, p) {
         return (state) => {
-          if (state === null) a = $o.seed;
+          if (state === null) a = $o[p];
           a |= 0;
           a = (a + 0x9e3779b9) | 0;
           let t = a ^ (a >>> 16);
@@ -40,7 +43,9 @@
           t = Math.imul(t, 0x735a2d97);
           return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
         };
-      })($o.seed);
+      }
+      $o.rnd = splitmix32($o.seed, 'seed');
+      $o.rndGlobal = splitmix32($o.seedGlobal, 'seedGlobal');
 
       function registerFeatures(features) {
         if (typeof features === 'undefined') {
@@ -101,7 +106,6 @@
       window.addEventListener('message', (e) => {
         if (e.data.id === '$o:export') {
           const exporter = $o._exports[e.data.mime];
-          console.log(e.data);
           exporter?.fn(e.data).then((exported) => {
             cast('exported', { ...e.data, exported });
           });

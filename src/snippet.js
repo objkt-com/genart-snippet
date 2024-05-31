@@ -3,7 +3,7 @@ var query = new URLSearchParams(window.location.search);
 window.$o = {
   _exports: {},
   _exported: null,
-  _v: '0.0.1',
+  _v: '1.0.0',
   capture,
   isCapture: query.has('capture'),
   registerExport,
