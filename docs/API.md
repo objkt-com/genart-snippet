@@ -83,8 +83,15 @@ In the capture environment and on objkt.com the generator will get the following
 - `seedGlobal=hex`
   The seed for this project, similar to `seed` except it will be the same for all tokens of a project.
 - `iteration=int`
-  The iteration number, randomized. Only available to projects that have a max mints.
-  For a project with max N tokens we'll define `iterations = shuffle(1..N)` and token `#M` will get `iterations[M]`.
+  A deterministically randomized iteration number. Only available to projects that have a max mints.
+  For a project with max `N` tokens we'll define `iterations = shuffle(1..N)` and token `#M` will receive `?iteration=iterations[M-1]`.
+  Note that the first minted token for project `foo` will still be named `foo #1` and the following tokens will be still be named sequentially.
+  For instance:
+    - A project with token title `foo` is created with max mints = 5.
+    - `iterations = deterministicShuffle(1..5)` gives `[4,2,5,3,1]`, this list will be the same for all tokens
+    - 1st minted token, `foo #1`, will get `?iteration=iterations[1-1]` so `iterations[0] = 4`
+    - 2nd minted token, `foo #2`, will get `?iteration=iterations[2-1]` so `iterations[1] = 2`
+    - Mth minted token, `foo #M`, will get `?iteration=iterations[M-1]`
 - `ts=int`
   The Unix time representing the datetime of the mint transaction. For instance: `1530374852` for `2018-06-30T16:07:32Z`
 
