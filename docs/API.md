@@ -60,8 +60,8 @@ Every minted token will be passed `seed=` and `seedGlobal=`. `seed` will be diff
 |                                     |                                              |                                                                                                                |
 | ----------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `$o.isCapture`                      | `bool`                                       | `true` in the capture environment or when a `?capture` query parameter exists                                  |
-| `$o.seed`                           | `integer`                                    | if `?seed=af628e00` is present the decimal integer from this hex string, otherwise a random integer            |
-| `$o.seedGlobal`                     | `integer`                                    | similar to `seed` but project-wide                                                                             |
+| `$o.seed`                           | `[uint32, uint32, uint32, uint32]`           | see `parseSeed()`                                                                                              |
+| `$o.seedGlobal`                     | `[uint32, uint32, uint32, uint32]`           | similar to `seed` but project-wide                                                                             |
 | `$o.capture()`                      | `() => Promise(void)`                        | triggers the capture by calling the default exporter with the provided resolution                              |
 | `$o.rnd()`                          | `() => float`                                | returns a random number `0 <= n < 1` based on `$o.seed`, one can reset the PRNG state with `$o.rnd(null)`      |
 | `$o.rndGlobal()`                    | `() => float`                                | same as `rnd()` but based on `$o.seedGlobal`, a project-wide seed (identical for all tokens of a same project) |
@@ -79,7 +79,7 @@ Every minted token will be passed `seed=` and `seedGlobal=`. `seed` will be diff
 In the capture environment and on objkt.com the generator will get the following query parameters:
 
 - `seed=hex`
-  The seed specific to this token. For instance: `af628e00`
+  The seed specific to this token, usually a 32-digit hexadecimal string represents 16 bytes of entropy. For instance: `6fe6fb92b8b141fab578f4a3bd43b347`
 - `seedGlobal=hex`
   The seed for this project, similar to `seed` except it will be the same for all tokens of a project.
 - `iteration=int`
